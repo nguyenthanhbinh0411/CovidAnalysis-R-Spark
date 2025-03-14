@@ -270,4 +270,4 @@ forecast::autoplot(forecast_result) +
 
 ## 9. Kết luận
 
-Dự án giúp trực quan hóa và phân tích dữ liệu COVID-19 với Sparklyr và ggplot2. Phân cụm K-Means giúp phân loại quốc gia theo mức độ ảnh hưởng của đại dịch. Các biểu đồ hỗ trợ đánh giá xu hướng dịch bệnh và sự ảnh hưởng trên toàn cầu.
+Dự án giúp trực quan hóa và phân tích dữ liệu COVID-19 với Sparklyr và ggplot2. Phân cụm K-Means giúp phân loại quốc gia theo mức độ ảnh hưởng của đại dịch, dự đoán các ca nhiễm trong tương lai bằng mô hình ARIMA. Các biểu đồ hỗ trợ đánh giá xu hướng dịch bệnh và sự ảnh hưởng trên toàn cầu.
