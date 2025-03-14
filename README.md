@@ -71,14 +71,6 @@ covid_summary <- covid_summary %>%
 
 ### 6.2. Phân cụm K-Means
 
-- Dữ liệu được chuẩn hóa trước khi phân cụm.
-- Sử dụng phương pháp K-Means với 3 cụm.
-
-```r
-set.seed(123)
-kmeans_result <- kmeans(covid_scaled, centers = 3, nstart = 10)
-```
-
 ### 6.2.1. Xác định số cụm tối ưu bằng phương pháp Elbow
 
 ```r
@@ -93,7 +85,14 @@ plot(1:10, wcss, type = "b", pch = 19, frame = FALSE,
      ylab = "Tổng phương sai nội bộ (WCSS)",
      main = "Phương pháp Elbow để xác định số cụm tối ưu")
 ```
+![image](https://github.com/user-attachments/assets/775fd475-1418-41b4-9e67-df84711b9a0c)
+- Dữ liệu được chuẩn hóa trước khi phân cụm.
+- Sử dụng phương pháp K-Means với 3 cụm được tối ưu bằng Elbow.
 
+```r
+set.seed(123)
+kmeans_result <- kmeans(covid_scaled, centers = 3, nstart = 10)
+```
 **Biểu đồ:** Trực quan hóa kết quả phân cụm:
 
 ```r
