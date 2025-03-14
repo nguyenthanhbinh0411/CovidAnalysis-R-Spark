@@ -1,16 +1,44 @@
 # CovidAnalysis-R-Spark
+---
 
-## 1. Giới thiệu
+## 1. Giới thiệu  
 
-Dự án này nhằm phân tích dữ liệu COVID-19 sử dụng Sparklyr và ggplot2 trong R. Chương trình kết nối với Apache Spark để xử lý dữ liệu quy mô lớn và trực quan hóa dữ liệu với nhiều loại biểu đồ.
+### Môn học Big Data  
+Big Data (Dữ liệu lớn) là một lĩnh vực nghiên cứu về các phương pháp lưu trữ, xử lý và phân tích dữ liệu có quy mô lớn, tốc độ cao và đa dạng. Môn học này tập trung vào các công nghệ như **Apache Spark, Hadoop**, cũng như các thuật toán học máy và thống kê để khai thác thông tin từ dữ liệu khổng lồ.  
+Môn học được hướng dẫn bởi hai giảng viên **Trần Quý Nam** và **Lê Thị Thùy Trang**, thuộc khoa *Công Nghệ Thông Tin*, trường **Đại học Đại Nam**.  
 
-## 2. Dữ liệu
+### Dự án CovidAnalysis-R-Spark  
+Dự án này nhằm **phân tích dữ liệu COVID-19** sử dụng **Sparklyr và ggplot2 trong R**. Chương trình kết nối với **Apache Spark** để xử lý dữ liệu quy mô lớn và trực quan hóa dữ liệu với nhiều loại biểu đồ.  
 
-Dữ liệu có 306,429 dòng và 8 cột, bao gồm các thông tin về ngày quan sát, quốc gia/khu vực, số ca nhiễm, tử vong và hồi phục. Một số điểm cần lưu ý:
+### Phân cụm K-means  
+K-means là một thuật toán phân cụm không giám sát, được sử dụng để **nhóm các điểm dữ liệu vào các cụm dựa trên sự tương đồng**. Trong dự án này, K-means có thể được sử dụng để **phân nhóm các quốc gia hoặc khu vực** dựa trên các chỉ số COVID-19 như **số ca nhiễm, số ca tử vong và tỷ lệ hồi phục**.  
 
-- Cột "Province/State" có giá trị thiếu.
-- Dữ liệu thời gian ở dạng chuỗi, cần chuyển đổi nếu cần phân tích theo thời gian.
-- Các cột "Confirmed", "Deaths" và "Recovered" là kiểu số, phù hợp để phân cụm.
+### Mô hình ARIMA  
+ARIMA (*AutoRegressive Integrated Moving Average*) là một mô hình dự báo chuỗi thời gian mạnh mẽ. Trong phân tích dữ liệu COVID-19, ARIMA có thể được áp dụng để **dự đoán số ca nhiễm trong tương lai** dựa trên dữ liệu lịch sử, giúp các nhà nghiên cứu và nhà hoạch định chính sách đưa ra quyết định tốt hơn.  
+
+### Thành viên nhóm  
+Nhóm thực hiện dự án gồm 4 thành viên:  
+
+| Họ và Tên | Mã Sinh Viên |  
+|-----------|-------------|  
+| Nguyễn Hữu Huy | 1671020139 |  
+| Nguyễn Thanh Bình | 1671020041 |  
+| Nguyễn Xuân Thuận | 1671010307 |  
+| Đào Thị Phương Long | 1671020182 |  
+
+---
+
+## 2. Dữ liệu  
+
+Dữ liệu được thu thập từ **Kaggle**, chứa thông tin về tình hình dịch COVID-19 trên toàn cầu  trong khoảng thời gian 22-01-2020 đến 29-05-2021. Tập dữ liệu có **306,429 dòng và 8 cột**, bao gồm các thông tin như **ngày quan sát, quốc gia/khu vực, số ca nhiễm, tử vong và hồi phục**.  
+
+Một số điểm cần lưu ý khi xử lý dữ liệu:  
+
+- **Cột "Province/State"** có nhiều giá trị bị thiếu, cần xử lý trước khi phân tích.  
+- **Dữ liệu thời gian** đang ở dạng chuỗi (string), cần được chuyển đổi sang định dạng thời gian phù hợp nếu thực hiện phân tích chuỗi thời gian với ARIMA.  
+- **Các cột "Confirmed", "Deaths" và "Recovered"** là kiểu số, có thể sử dụng cho phân tích thống kê, trực quan hóa và phân cụm với K-means.  
+
+---
 
 ## 3. Cài đặt
 
