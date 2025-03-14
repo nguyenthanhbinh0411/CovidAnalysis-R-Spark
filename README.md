@@ -1,12 +1,20 @@
-# README: Phân tích Dữ liệu COVID-19 sử dụng Sparklyr, dplyr và ggplot2
+# CovidAnalysis-R-Spark
 
 ## 1. Giới thiệu
 
 Dự án này nhằm phân tích dữ liệu COVID-19 sử dụng Sparklyr và ggplot2 trong R. Chương trình kết nối với Apache Spark để xử lý dữ liệu quy mô lớn và trực quan hóa dữ liệu với nhiều loại biểu đồ.
 
-## 2. Cài đặt
+## 2. Dữ liệu
 
-### 2.1. Cài đặt thư viện
+Dữ liệu có 306,429 dòng và 8 cột, bao gồm các thông tin về ngày quan sát, quốc gia/khu vực, số ca nhiễm, tử vong và hồi phục. Một số điểm cần lưu ý:
+
+- Cột "Province/State" có giá trị thiếu.
+- Dữ liệu thời gian ở dạng chuỗi, cần chuyển đổi nếu cần phân tích theo thời gian.
+- Các cột "Confirmed", "Deaths" và "Recovered" là kiểu số, phù hợp để phân cụm.
+
+## 3. Cài đặt
+
+### 3.1. Cài đặt thư viện
 
 Chạy lệnh sau để cài đặt các thư viện cần thiết:
 
@@ -15,7 +23,7 @@ install.packages(c("sparklyr", "dplyr", "ggplot2", "cluster", "factoextra",
                    "forecast", "tidyr", "scales", "lubridate", "pheatmap", "countrycode"))
 ```
 
-### 2.2. Cài đặt Apache Spark (nếu chưa có)
+### 3.2. Cài đặt Apache Spark (nếu chưa có)
 
 ```r
 if (!"3.4.1" %in% spark_available_versions()) {
@@ -23,7 +31,7 @@ if (!"3.4.1" %in% spark_available_versions()) {
 }
 ```
 
-## 3. Kết nối với Spark
+## 4. Kết nối với Spark
 
 Chương trình kết nối với Apache Spark chạy ở chế độ local:
 
@@ -31,7 +39,7 @@ Chương trình kết nối với Apache Spark chạy ở chế độ local:
 sc <- spark_connect(master = "local")
 ```
 
-## 4. Nạp và Tiền xử lý dữ liệu
+## 5. Nạp và Tiền xử lý dữ liệu
 
 - Dữ liệu COVID-19 được tải từ file CSV và Spark tự động nhận diện schema.
 - Chuyển đổi kiểu dữ liệu của các cột.
@@ -47,9 +55,9 @@ covid_cleaned <- covid_data %>%
   select(-Last_Update)
 ```
 
-## 5. Phân tích Dữ liệu
+## 6. Phân tích Dữ liệu
 
-### 5.1. Phân tích thống kê
+### 6.1. Phân tích thống kê
 
 Tính tỷ lệ tử vong và hồi phục:
 
@@ -61,35 +69,7 @@ covid_summary <- covid_summary %>%
   )
 ```
 
-### 5.2.1. Xác định số cụm tối ưu bằng phương pháp Elbow
-
-```r
-# Trực quan hóa kết quả phân cụm
-fviz_cluster(kmeans_result, data = covid_scaled, geom = "point", ellipse.type = "convex") +
-  scale_color_manual(values = cluster_colors, aesthetics = "colour") +
-  scale_fill_manual(values = cluster_colors, aesthetics = "fill") +
-  labs(title = "Kết quả phân cụm các quốc gia theo mức độ ảnh hưởng dịch COVID-19") +
-  theme_minimal() +
-  theme(legend.position = "top")
-```
-![image](https://github.com/user-attachments/assets/52f9464e-680d-4b02-95b7-e97c73311d5f)
-
-```r
-# Vẽ biểu đồ cột thể hiện phần trăm ca nhiễm của từng cụm
-ggplot(cluster_cases, aes(x = Cluster, y = Percentage, fill = Cluster)) +
-  geom_bar(stat = "identity", color = "black", width = 0.6) +
-  scale_fill_manual(values = cluster_colors) +
-  geom_text(aes(label = paste0(round(Percentage, 1), "%\n(", format(Total_Cases, big.mark = "."), " ca)")), 
-            vjust = -0.3, size = 4) +
-  ylim(0, max(cluster_cases$Percentage) + 5) +
-  labs(title = "Tỷ lệ phần trăm ca nhiễm của các cụm",
-       x = "Cụm", y = "Phần trăm ca nhiễm (%)") +
-  theme_minimal()
-```
-![image](https://github.com/user-attachments/assets/442f956e-aef9-4646-9a77-4a7cea9b5694)
-
-
-### 5.2.2. Phân cụm K-Means
+### 6.2. Phân cụm K-Means
 
 - Dữ liệu được chuẩn hóa trước khi phân cụm.
 - Sử dụng phương pháp K-Means với 3 cụm.
@@ -97,6 +77,21 @@ ggplot(cluster_cases, aes(x = Cluster, y = Percentage, fill = Cluster)) +
 ```r
 set.seed(123)
 kmeans_result <- kmeans(covid_scaled, centers = 3, nstart = 10)
+```
+
+### 6.2.1. Xác định số cụm tối ưu bằng phương pháp Elbow
+
+```r
+wcss <- vector()
+for (k in 1:10) {
+  kmeans_result <- kmeans(covid_scaled, centers = k, nstart = 10)
+  wcss[k] <- kmeans_result$tot.withinss
+}
+
+plot(1:10, wcss, type = "b", pch = 19, frame = FALSE,
+     xlab = "Số cụm K",
+     ylab = "Tổng phương sai nội bộ (WCSS)",
+     main = "Phương pháp Elbow để xác định số cụm tối ưu")
 ```
 
 **Biểu đồ:** Trực quan hóa kết quả phân cụm:
@@ -128,7 +123,7 @@ ggplot(cluster_cases, aes(x = Cluster, y = Percentage, fill = Cluster)) +
 
 ![image](https://github.com/user-attachments/assets/74e2e142-ca36-4a26-8735-99600a929b16)
 
-### 5.3. Biểu đồ số ca nhiễm theo thời gian
+### 6.3. Biểu đồ số ca nhiễm theo thời gian
 
 ```r
 ggplot(covid_summary, aes(x = ObservationDate, y = Total_Confirmed)) +
@@ -145,9 +140,9 @@ ggplot(covid_summary, aes(x = ObservationDate, y = Total_Confirmed)) +
 
 ![image](https://github.com/user-attachments/assets/c2625af9-3275-4d90-83e5-e86f306e7e14)
 
-## 6. Trực quan hóa Dữ liệu
+## 7. Trực quan hóa Dữ liệu
 
-### 6.1. Biểu đồ phân tán số ca nhiễm và tử vong
+### 7.1. Biểu đồ phân tán số ca nhiễm và tử vong
 
 ```r
 ggplot(covid_latest, aes(x = Total_Confirmed, y = Total_Deaths, color = as.factor(Cluster))) +
@@ -165,7 +160,7 @@ ggplot(covid_latest, aes(x = Total_Confirmed, y = Total_Deaths, color = as.facto
 
 ![image](https://github.com/user-attachments/assets/e23783cc-98c7-463a-987f-fdc0987e5988)
 
-### 6.2. Heatmap mức độ tập trung dịch bệnh
+### 7.2. Heatmap mức độ tập trung dịch bệnh
 
 **Biểu đồ:** Heatmap cho 10 quốc gia có số ca nhiễm cao nhất:
 
@@ -183,7 +178,7 @@ plot_heatmap(c(top_10_death_countries, "Total_Deaths"), "Heatmap - 10 quốc gia
 
 ![image](https://github.com/user-attachments/assets/e97a7a13-9d9d-48e3-b58e-5c1afe645355)
 
-### 6.3. Biểu đồ hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc cao nhất
+### 7.3. Biểu đồ hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc cao nhất
 
 **Biểu đồ:** hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc cao nhất:
 
@@ -203,7 +198,7 @@ ggplot(top_countries_long, aes(x = reorder(Country, -Count), y = Count, fill = C
 
 ![image](https://github.com/user-attachments/assets/88137dd2-edca-43d4-94c1-c4e0358f9e40)
 
-### 6.4. Biểu đồ hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc thấp nhất
+### 7.4. Biểu đồ hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc thấp nhất
 
 **Biểu đồ:** hiển thị tổng số ca mắc, hồi phục và tử vong của 10 quốc gia có số ca mắc thấp nhất:
 
@@ -223,9 +218,9 @@ ggplot(bottom_countries_long, aes(x = reorder(Country, -Count), y = Count, fill 
 
 ![image](https://github.com/user-attachments/assets/b6251021-0ba7-4200-8bb8-fbbb8ae4fd16)
 
-### 7. Biểu đồ hiển thị và so sánh tống số ca nhiễm và hồi phục của các châu lục
+### 7.5. Biểu đồ hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục
 
-**Biểu đồ:** hiển thị và so sánh tống số ca nhiễm và hồi phục của các châu lục:
+**Biểu đồ:** hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục:
 
 ```r
 ggplot(continent_summary, aes(x = ObservationDate)) +
@@ -241,30 +236,25 @@ ggplot(continent_summary, aes(x = ObservationDate)) +
 
 ![image](https://github.com/user-attachments/assets/23f7c1f2-98ab-40af-8487-5324a675ad44)
 
-### 8.Biểu đồ hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục
+### 7.6. Biểu đồ hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục (biểu đồ nhiệt)
 
-**Biểu đồ:** hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục (biểu đồ nhiệt)
-:
+**Biểu đồ:** hiển thị và so sánh tổng số ca nhiễm và hồi phục của các châu lục (biểu đồ nhiệt):
 
 ```r
-  heatmap(continent_matrix,
-          Rowv = NA, Colv = NA,
-          col = rev(heat.colors(256)),
-          scale = "none",
-          main = "Biểu đồ nhiệt số ca nhiễm và hồi phục theo châu lục",
-          xlab = "Châu lục", ylab = "Thời gian",
-          margins = c(8, 8),
-          cexRow = 1, cexCol = 0.7,
-          labRow = format(formatted_dates, "%d-%m-%Y"))
+heatmap(continent_matrix,
+        Rowv = NA, Colv = NA,
+        col = rev(heat.colors(256)),
+        scale = "none",
+        main = "Biểu đồ nhiệt số ca nhiễm và hồi phục theo châu lục",
+        xlab = "Châu lục", ylab = "Thời gian",
+        margins = c(8, 8),
+        cexRow = 1, cexCol = 0.7,
+        labRow = format(formatted_dates, "%d-%m-%Y"))
 ```
 
 ![image](https://github.com/user-attachments/assets/71a9d731-d27b-4cfe-9bab-87517eeea3ee)
 
-## 9. Kết luận
-
-Dự án giúp trực quan hóa và phân tích dữ liệu COVID-19 với Sparklyr và ggplot2. Phân cụm K-Means giúp phân loại quốc gia theo mức độ ảnh hưởng của đại dịch. Các biểu đồ hỗ trợ đánh giá xu hướng dịch bệnh và sự ảnh hưởng trên toàn cầu.
-
-## 10. Dự báo xu hướng lây nhiễm COVID-19 bằng mô hình ARIMA
+## 8. Dự báo xu hướng lây nhiễm COVID-19 bằng mô hình ARIMA
 
 ```r
 # Vẽ biểu đồ dự báo
@@ -278,3 +268,7 @@ forecast::autoplot(forecast_result) +
   theme_minimal()
 ```
 ![image](https://github.com/user-attachments/assets/a82bd825-42b6-4fb3-a584-422e5e99e936)
+
+## 9. Kết luận
+
+Dự án giúp trực quan hóa và phân tích dữ liệu COVID-19 với Sparklyr và ggplot2. Phân cụm K-Means giúp phân loại quốc gia theo mức độ ảnh hưởng của đại dịch. Các biểu đồ hỗ trợ đánh giá xu hướng dịch bệnh và sự ảnh hưởng trên toàn cầu.
