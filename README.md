@@ -279,9 +279,9 @@ heatmap(continent_matrix,
         labRow = format(formatted_dates, "%d-%m-%Y"))
 ```
 
-![image](https://github.com/user-attachments/assets/71a9d731-d27b-4cfe-9bab-87517eeea3ee)
+![image](https://github.com/user-attachments/assets/1dc7c003-340d-413d-b551-da0b03fd9964)
 
-## 8. Dự báo xu hướng lây nhiễm COVID-19 bằng mô hình ARIMA
+## 8. Dự báo xu hướng lây nhiễm COVID-19 bằng mô hình ARIMA:
 
 ```r
 # Vẽ biểu đồ dự báo
